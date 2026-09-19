@@ -18,7 +18,7 @@ data:
     spring.jpa.show-sql=true
 
     # Console web do H2, acessivel em http://localhost:8083/h2-console
-    spring.h2.console.enabled=true
+    spring.h2.console.enabled=false
     spring.h2.console.path=/h2-console
 
     # Registro no Eureka

@@ -27,6 +27,8 @@ spec:
           ports:
             - containerPort: 8083
           env:
+            - name: AUTH_JWK_SET_URI
+              value: "http://auth-service:8084/auth/jwks"
             - name: SPRING_CONFIG_IMPORT
               value: "optional:configserver:http://config-server:8888"
             - name: SPRING_PROFILES_ACTIVE

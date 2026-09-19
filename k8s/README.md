@@ -15,7 +15,7 @@ kind create cluster --name ecommerce
 ## 3. Buildar e carregar as imagens
 
 ```bash
-for s in eureka-server config-server produtos-service vendas-service gateway; do
+for s in eureka-server config-server produtos-service vendas-service clientes-service auth-service gateway; do
   docker build -t $s:1.0 ./$s
   kind load docker-image $s:1.0 --name ecommerce
 done
@@ -36,6 +36,12 @@ kubectl get pods -n ecommerce -w
 Espera até todos ficarem `1/1 Running` (Ctrl+C pra sair do watch).
 
 ## 6. Acessar
+
+O Gateway descobre o auth-service pelo Eureka e expoe `POST /auth-service/auth/login`,
+`POST /auth-service/auth/refresh` e a rota protegida `GET /clientes-service/clientes`.
+Veja os [exemplos de autenticacao](../auth-service/README.md).
+O auth-service usa chaves e sessoes em memoria, com uma replica; apos reinicia-lo,
+faca login novamente. Produtos e vendas permanecem publicos neste exercicio.
 
 Os Services sao ClusterIP (so existem dentro do cluster). Pra acessar do Mac,
 abre um tunel:

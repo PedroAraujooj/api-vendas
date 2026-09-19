@@ -24,6 +24,10 @@ spec:
           ports:
             - containerPort: 8085
           env:
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service:8084"
+            - name: CLIENTES_SERVICE_URL
+              value: "http://clientes-service:8083"
             - name: SPRING_APPLICATION_JSON
               value: '{"eureka":{"client":{"serviceUrl":{"defaultZone":"http://eureka-server:8761/eureka/"}}}}'
             # O Eureka registrava o hostname do Pod (ex: produtos-service-abc123),
