@@ -36,50 +36,71 @@ As rotas da tabela são diretas, na porta 8084. Pelo Gateway, use
 
 A rota `GET /clientes-service/clientes`, no Gateway, é protegida e exige `Authorization: Bearer TOKEN`.
 
-## Como testar
+## Como testar com Postman
 
-Execute os exemplos no mesmo terminal PowerShell.
+Com os serviços executando, crie as requisições abaixo no Postman e clique em **Send** para enviar. Os exemplos usam o Gateway na porta **8085**.
 
-**1. Fazer login:**
+### 1. Acesso sem autenticação
 
-```powershell
-$login = Invoke-RestMethod -Method Post -Uri http://localhost:8085/auth-service/auth/login `
-  -ContentType 'application/json' `
-  -Body '{"username":"aluno","password":"Prova123!"}'
+- Método: **GET**
+- URL: `http://localhost:8085/clientes-service/clientes`
+- Em **Authorization**, selecione **No Auth**. Remova qualquer header `Authorization` adicionado manualmente.
 
-$login | Format-List
+Resultado esperado: **401 Unauthorized**.
+
+### 2. Fazer login
+
+- Método: **POST**
+- URL: `http://localhost:8085/auth-service/auth/login`
+- Em **Authorization**, selecione **No Auth**.
+- Em **Body**, selecione **raw** e o formato **JSON**. Cole:
+
+```json
+{
+  "username": "aluno",
+  "password": "Prova123!"
+}
 ```
 
-A resposta contém `access_token` e `refresh_token`.
+Resultado esperado: **200 OK**. Copie os valores de `access_token` e `refresh_token` da resposta, sem as aspas.
 
-**2. Acessar clientes com o token:**
+### 3. Acessar clientes com o token
 
-```powershell
-curl.exe -i http://localhost:8085/clientes-service/clientes `
-  -H "Authorization: Bearer $($login.access_token)"
+- Método: **GET**
+- URL: `http://localhost:8085/clientes-service/clientes`
+- Em **Authorization**, selecione **Bearer Token**.
+- No campo **Token**, cole o `access_token` recebido no login, sem escrever `Bearer` antes dele.
+
+Resultado esperado: **200 OK** e a lista de clientes.
+
+### 4. Renovar os tokens
+
+- Método: **POST**
+- URL: `http://localhost:8085/auth-service/auth/refresh`
+- Em **Authorization**, selecione **No Auth**.
+- Em **Body → raw → JSON**, cole o corpo abaixo, substituindo o texto pelo `refresh_token` recebido no login:
+
+```json
+{
+  "refresh_token": "COLE_AQUI_O_REFRESH_TOKEN"
+}
 ```
 
-Resultado esperado: HTTP **200** e a lista de clientes.
+Resultado esperado: **200 OK**, com novos valores de `access_token` e `refresh_token`.
 
-**3. Renovar os tokens:**
+### 5. Acessar clientes com o novo token
 
-```powershell
-$novo = Invoke-RestMethod -Method Post -Uri http://localhost:8085/auth-service/auth/refresh `
-  -ContentType 'application/json' `
-  -Body (@{ refresh_token = $login.refresh_token } | ConvertTo-Json)
+Volte à requisição de clientes do passo 3, substitua o campo **Token** pelo novo `access_token` e clique em **Send**.
 
-$novo | Format-List
-```
+Resultado esperado: **200 OK**. Na próxima renovação, use o novo `refresh_token`; o anterior já foi consumido.
 
-Use `$novo.access_token` para acessar clientes e `$novo.refresh_token` na próxima renovação. O refresh anterior não pode ser reutilizado.
+### 6. Testar credenciais inválidas
 
-**4. Testar acesso sem autenticação:**
+- **Senha incorreta:** repita o login usando `"password": "senha-errada"`. Resultado: **401 Unauthorized**.
+- **Token inválido:** na requisição de clientes, substitua o campo **Token** por `token-invalido`. Resultado: **401 Unauthorized**.
+- **Refresh reutilizado:** envie novamente o refresh token consumido no passo 4. Resultado: **401 Unauthorized**.
 
-```powershell
-curl.exe -i http://localhost:8085/clientes-service/clientes
-```
-
-Resultado esperado: HTTP **401**. Senha incorreta e tokens inválidos também são rejeitados com **401**.
+Na porta 8085, mantenha os prefixos `/auth-service` e `/clientes-service` nas URLs. Os endereços antigos `/auth/login` e `/api/clientes` não estão configurados no Gateway.
 
 ## Observações
 
