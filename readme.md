@@ -1,3 +1,5 @@
+Aluno: Pedro Araujo Vieira; Matrícula: 16123288733; e-mail: pedro.vieira@al.infnet.edu.br
+
 # Documentação Microserviços
 https://claude.ai/code/artifact/2c541174-0b49-486d-9ee2-1682e91b8daf
 
